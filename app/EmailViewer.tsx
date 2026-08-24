@@ -70,7 +70,7 @@ const EmailViewer = () => {
           />
           <OrderSelector value={orderBy} onChange={setOrderBy} />
           {isLoading ? (
-            <div className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm">
+            <div className="flex-shrink-0 border-b border-border bg-background/80 backdrop-blur-sm">
               <div className="mx-auto flex max-w-3xl items-center justify-center px-4 py-3">
                 <span className="text-xs text-muted-foreground">
                   Loading...
