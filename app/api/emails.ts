@@ -7,6 +7,7 @@ export const GET = async (req: Request): Promise<Response> => {
   const page = parseInt(url.searchParams.get("page") || "1", 10)
   const pageSize = parseInt(url.searchParams.get("pageSize") || "20", 10)
   const orderBy = url.searchParams.get("orderBy") || "rrf"
+  console.log("url", url)
 
   let emailsWithScores: EmailWithScores[] = []
 
