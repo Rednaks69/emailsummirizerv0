@@ -30,7 +30,7 @@ const Message = ({
                   // Apply prose-invert only for the assistant (dark purple background)
                   // and explicitly target paragraphs/headings if needed
                   !isUser
-                    ? "text-black prose-invert dark:text-white"
+                    ? "prose text-black dark:text-white dark:prose-invert"
                     : "text-white dark:text-black"
                 )}
               >
