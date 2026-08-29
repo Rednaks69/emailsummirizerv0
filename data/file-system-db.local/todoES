@@ -1,0 +1,34 @@
+# Email Summarizer Project - TODO List (todoES)
+
+## Phase 1: Email Embeddings & Vector Storage
+- [ ] **Choose an Embedding Model**: Select a model (e.g., OpenAI `text-embedding-3-small`, HuggingFace `sentence-transformers`, etc.).
+- [ ] **Data Pipeline / Preprocessing**: 
+  - [ ] Fetch/load emails from your source (IMAP, Gmail API, local files, etc.).
+  - [ ] Clean email text (remove HTML tags, signatures, boilerplate).
+  - [ ] Chunk large emails if necessary to fit token limits.
+- [ ] **Generate Embeddings**: 
+  - [ ] Write a script to iterate through emails and generate vector embeddings.
+- [ ] **Setup Vector Database**: 
+  - [ ] Choose and initialize a vector DB (e.g., Chroma, FAISS, Pinecone, pgvector).
+  - [ ] Store email embeddings along with metadata (subject, sender, date, thread ID).
+
+## Phase 2: Semantic Search Implementation
+- [ ] **Query Processing**: 
+  - [ ] Take user search input/query.
+  - [ ] Generate an embedding for the user's search query using the same model.
+- [ ] **Similarity Search**: 
+  - [ ] Query the vector database for the top $K$ most relevant emails using cosine similarity or Euclidean distance.
+- [ ] **Search API / Interface**: 
+  - [ ] Create a basic function or endpoint to test search queries and return matching email snippets.
+
+## Phase 3: Summarization Integration (Bonus/Next Steps)
+- [ ] **Context Assembly**: 
+  - [ ] Format the retrieved search results/emails into a clean prompt context for the LLM.
+- [ ] **LLM Summarization**: 
+  - [ ] Send the retrieved emails to an LLM (e.g., GPT-4o, Claude) with a prompt like: *"Summarize the key points from these emails regarding [User Query]."*
+- [ ] **Output & Refinement**: 
+  - [ ] Display the summary alongside the source email references.
+
+## Phase 4: Testing & Polish
+- [ ] Test edge cases (empty search results, very long email threads, API rate limits).
+- [ ] Optimize retrieval performance and summary accuracy.

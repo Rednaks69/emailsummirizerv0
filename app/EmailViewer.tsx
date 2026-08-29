@@ -2,124 +2,167 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import {
-  EmailCard,
-  OrderSelector,
-  Pagination,
-  SearchInput,
-  StatsBar,
-  Wrapper,
-} from "./components"
 
-type OrderBy = "rrf" | "semantic" | "bm25"
+export type Email = {
+  index: number
+  id: string
+  from: string
+  to: string
+  subject: string
+  body: string
+  timestamp: string
+}
 
 type EmailsResponse = {
-  emails: Array<{
-    index: number
-    id: string
-    from: string
-    to: string
-    subject: string
-    body: string
-    timestamp: string
-    bm25Score: number
-    embeddingScore: number
-    rrfScore: number
-  }>
+  emails: Email[]
   stats: {
     total: number
     pageCount: number
     currentPage: number
-    minScore: number
-    maxScore: number
   }
 }
 
-const EmailViewer = () => {
-  const [inputValue, setInputValue] = useState("")
-  const [search, setSearch] = useState("")
-  const [page, setPage] = useState(1)
-  const [orderBy, setOrderBy] = useState<OrderBy>("rrf")
+type EmailViewerProps = {
+  searchResults: Email[] | null
+}
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["emails", search, page, orderBy],
+const EmailViewer = ({ searchResults }: EmailViewerProps) => {
+  const [page, setPage] = useState(1)
+
+  const { data, isPending, isError, error } = useQuery<EmailsResponse>({
+    queryKey: ["emails", page],
+
     queryFn: async () => {
       const params = new URLSearchParams({
-        search,
-        page: page.toString(),
-        orderBy,
+        page: String(page),
+        pageSize: "20",
       })
-      const res = await fetch(`/?${params}`)
-      return (await res.json()) as EmailsResponse
+
+      const response = await fetch(`/api/chat?${params}`)
+
+      console.log("STATUS:", response.status)
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch emails: ${response.status}`)
+      }
+
+      const json = await response.json()
+
+      console.log("EMAIL API RESPONSE:", json)
+
+      return json as EmailsResponse
     },
   })
 
-  const handleSearchSubmit = (value: string) => {
-    setSearch(value)
-    setPage(1)
+  console.log("searchResults111", searchResults)
+
+  const emails = searchResults !== null ? searchResults : data?.emails // searchResults  data?.emails
+
+  const isSearching = searchResults !== null
+
+  // IMPORTANT
+  if (isPending) {
+    return <div>Loading emails...</div>
+  }
+
+  if (isError) {
+    return (
+      <div>
+        <p>Failed to load emails</p>
+        <p>{error instanceof Error ? error.message : "Unknown error"}</p>
+      </div>
+    )
+  }
+
+  // Safety guard
+  if (!data) {
+    return <div>No email data</div>
   }
 
   return (
-    <Wrapper
-      header={
-        <>
-          <SearchInput
-            value={inputValue}
-            onChange={setInputValue}
-            onSubmit={handleSearchSubmit}
-          />
-          <OrderSelector value={orderBy} onChange={setOrderBy} />
-          {isLoading ? (
-            <div className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm">
-              <div className="mx-auto flex max-w-3xl items-center justify-center px-4 py-3">
-                <span className="text-xs text-muted-foreground">
-                  Loading...
-                </span>
-              </div>
-            </div>
-          ) : data ? (
-            <StatsBar
-              total={data.stats.total}
-              currentPage={data.stats.currentPage}
-              pageCount={data.stats.pageCount}
-              minScore={data.stats.minScore * 10}
-              maxScore={data.stats.maxScore * 10}
-            />
-          ) : // <div className=""></div>
-          null}
-        </>
-      }
-      footer={
-        isLoading || !data ? null : (
-          <Pagination
-            currentPage={page}
-            pageCount={data.stats.pageCount}
-            onPageChange={setPage}
-          />
-        )
-      }
-    >
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12 text-muted-foreground">
-          Loading emails...
+    <div className="h-full overflow-y-auto p-6">
+      {/* ----------------------------------- */}
+      {/* Header */}
+      {/* ----------------------------------- */}
+
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">
+          {isSearching ? "Search Results" : "Emails"}
+        </h1>
+
+        {isSearching ? (
+          <p className="text-sm text-muted-foreground">
+            {searchResults.length} email
+            {searchResults.length !== 1 ? "s" : ""} found
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Page {data.stats.currentPage} / {data.stats.pageCount}
+          </p>
+        )}
+      </div>
+
+      {/* ----------------------------------- */}
+      {/* Email list */}
+      {/* ----------------------------------- */}
+
+      {emails?.length === 0 ? (
+        <div className="py-10 text-center">
+          <p>{isSearching ? "No emails found." : "No emails."}</p>
         </div>
-      ) : data ? (
-        data.emails.map((email) => (
-          <EmailCard
-            key={email.id}
-            index={email.index}
-            from={email.from}
-            to={email.to}
-            subject={email.subject}
-            body={email.body}
-            bm25Score={email.bm25Score}
-            embeddingScore={email.embeddingScore}
-            rrfScore={email.rrfScore}
-            activeOrder={orderBy}
-          />
-        ))
-      ) : null}
-    </Wrapper>
+      ) : (
+        <div className="space-y-4">
+          {emails?.map((email) => (
+            <div
+              key={email.id}
+              className="border-foreground/2d0 rounded-lg border-2 p-0.5"
+            >
+              <div className="rounded-lg bg-muted/65 p-4">
+                <h2 className="font-semibold">{email.subject}</h2>
+
+                <div className="mt-2 text-sm">
+                  <p>
+                    <strong>From:</strong> {email.from}
+                  </p>
+
+                  <p>
+                    <strong>To:</strong> {email.to}
+                  </p>
+
+                  <p>
+                    <strong>Date:</strong> {email.timestamp}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 px-4 pb-4 text-sm whitespace-pre-wrap">
+                {email.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isSearching && (
+        <div className="mt-6 flex gap-3">
+          <button
+            className="rounded border px-4 py-2 disabled:opacity-50"
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Previous
+          </button>
+
+          <button
+            className="rounded border px-4 py-2 disabled:opacity-50"
+            disabled={page >= data.stats.pageCount}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 

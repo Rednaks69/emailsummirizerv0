@@ -1,27 +1,31 @@
-import Chat from "@/app/Chat"
+"use client"
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 
-import EmailViewer from "./EmailViewer"
+import EmailViewer, { Email } from "./EmailViewer"
+import ChatBox from "@/components/ChatBox"
+import { useState } from "react"
 
 export default function Page() {
+  const [searchResults, setSearchResults] = useState<Email[] | null>(null)
+
   return (
     <ResizablePanelGroup
       orientation="horizontal"
-      className="no-scrollbar h-full min-h-screen w-full overflow-hidden rounded-lg border"
+      className="h-full min-h-screen w-full"
     >
       <ResizablePanel defaultSize="60%">
-        <div className="no-scrollbar flex h-full items-center justify-center overflow-hidden p-6">
-          <EmailViewer />
+        <div className="h-full min-h-screen w-full">
+          <EmailViewer searchResults={searchResults} />
         </div>
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize="40%">
-        <div className="no-scrollbar flex h-full w-full items-center justify-center overflow-hidden p-6">
-          <Chat />
+        <div className="h-full min-h-screen w-full px-6 pt-8">
+          <ChatBox onSearchResults={setSearchResults} />
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
