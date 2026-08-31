@@ -12,6 +12,20 @@ import {
 import z from "zod"
 import { searchEmailsViaBM25 } from "@/app/bm25"
 import { loadEmails } from "@/app/utils"
+import { searchEmails } from "@/app/search"
+
+const getLastUserMessageText = (messages: UIMessage[]) => {
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === "user")
+
+  if (!lastUserMessage) {
+    return ""
+  }
+
+  return lastUserMessage.parts
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join(" ")
+}
 
 export const POST = async (req: Request): Promise<Response> => {
   const body: { messages: UIMessage[] } = await req.json()
@@ -41,7 +55,15 @@ export const POST = async (req: Request): Promise<Response> => {
 
       console.log(keywords.output.keywords)
 
-      const searchResults = await searchEmailsViaBM25(keywords.output.keywords)
+      // Always searches by BM25 + embeddings together and fuses the two
+      // rankings with RRF — there's no single "orderBy" mode to pick between.
+      const searchResults = await searchEmails({
+        keywordsForBM25: keywords.output.keywords,
+        embeddingsQuery: getLastUserMessageText(messages),
+      })
+
+      console.log(searchResults)
+
       const topResults = searchResults.slice(
         0,
         Math.min(5, searchResults.length)

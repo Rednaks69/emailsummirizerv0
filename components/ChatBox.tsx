@@ -102,7 +102,7 @@ const ChatBox = ({ onSearchResults }: ChatBoxProps) => {
           }}
         />
         <Button
-          className="min-h-20 rounded-md bg-sidebar-primary px-5 py-2 font-bold text-white transition hover:bg-sidebar-primary/80 dark:bg-chart-4 hover:dark:bg-chart-4/80"
+          className="min-h-20 rounded-md bg-sidebar-primary px-5 py-2 font-bold text-white shadow-md transition hover:bg-sidebar-primary/80 dark:bg-amber-600 dark:shadow-amber-400/30 hover:dark:bg-amber-600/80"
           type="submit"
         >
           <FaRegArrowAltCircleDown />

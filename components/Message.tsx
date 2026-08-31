@@ -16,7 +16,7 @@ const Message = ({
         className={cn(
           "transition-colors",
           isUser
-            ? "rounded-lg border border-border bg-foreground px-4 py-3 shadow-xs"
+            ? "rounded-lg border border-border bg-purple-900 px-4 py-3 shadow-sm dark:bg-amber-500 dark:shadow-amber-400"
             : "rounded-lg border border-border bg-accent px-4 py-3 shadow-sm"
         )}
       >
@@ -31,7 +31,7 @@ const Message = ({
                   // and explicitly target paragraphs/headings if needed
                   !isUser
                     ? "prose text-black dark:text-white dark:prose-invert"
-                    : "text-white dark:text-black"
+                    : "font-normal text-white dark:text-black"
                 )}
               >
                 <ReactMarkdown>{part.text}</ReactMarkdown>
